@@ -1,51 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang }}" dir="{{ direction }}">
 <head>
 <meta charset="utf-8">
 <style>
-body { font-family: Arial, sans-serif; font-size: 14px; color: #222; margin: 48px; }
-h1 { text-align: center; letter-spacing: 2px; margin-bottom: 32px; }
+body { font-family: 'Segoe UI', Tahoma, 'Noto Sans Arabic', 'DejaVu Sans', Arial, sans-serif; font-size: 14px; color: #222; margin: 48px; }
+h1 { text-align: center; margin-bottom: 32px; }
 .meta { display: flex; justify-content: space-between; margin-bottom: 24px; }
 table { width: 100%; border-collapse: collapse; }
-th, td { border: 1px solid #999; padding: 8px; }
-th { background: #eee; text-align: left; }
-.num { text-align: right; }
-.totals { width: 40%; margin-left: auto; margin-top: 16px; }
+th, td { border: 1px solid #999; padding: 8px; text-align: start; }
+th { background: #eee; }
+.num { text-align: end; }
+.totals { width: 50%; margin-inline-start: auto; margin-top: 16px; }
 .totals td:first-child { font-weight: bold; }
 </style>
 </head>
 <body>
-<h1>TAX INVOICE</h1>
+<h1>{{ labels.title }}</h1>
 <div class="meta">
   <div>
-    <strong>{{ invoice.supplier_name }}</strong><br>
-    TRN: {{ invoice.supplier_trn }}
+    {% for name in supplier_names %}<strong>{{ name }}</strong><br>{% endfor %}
+    {{ labels.trn }}: {{ invoice.supplier_trn | digits }}
   </div>
   <div>
-    Invoice No: {{ invoice.invoice_number }}<br>
-    Date: {{ invoice.invoice_date.strftime("%d/%m/%Y") }}
+    {{ labels.invoice_number }}: {{ invoice.invoice_number | digits }}<br>
+    {{ labels.date }}: {{ invoice.invoice_date.strftime("%d/%m/%Y") | digits }}
   </div>
 </div>
 <table>
   <tr>
-    <th>Description</th>
-    <th class="num">Qty</th>
-    <th class="num">Unit Price</th>
-    <th class="num">Amount</th>
+    <th>{{ labels.description }}</th>
+    <th class="num">{{ labels.quantity }}</th>
+    <th class="num">{{ labels.unit_price }}</th>
+    <th class="num">{{ labels.amount }}</th>
   </tr>
   {% for item in invoice.items %}
   <tr>
     <td>{{ item.description }}</td>
-    <td class="num">{{ item.quantity | int }}</td>
-    <td class="num">{{ "%.2f" | format(item.unit_price) }}</td>
-    <td class="num">{{ "%.2f" | format(item.line_total) }}</td>
+    <td class="num">{{ item.quantity | int | digits }}</td>
+    <td class="num">{{ "%.2f" | format(item.unit_price) | digits }}</td>
+    <td class="num">{{ "%.2f" | format(item.line_total) | digits }}</td>
   </tr>
   {% endfor %}
 </table>
 <table class="totals">
-  <tr><td>Subtotal</td><td class="num">{{ "%.2f" | format(invoice.subtotal) }} {{ invoice.currency }}</td></tr>
-  <tr><td>VAT 5%</td><td class="num">{{ "%.2f" | format(invoice.vat_amount) }} {{ invoice.currency }}</td></tr>
-  <tr><td>Total</td><td class="num">{{ "%.2f" | format(invoice.total) }} {{ invoice.currency }}</td></tr>
+  <tr><td>{{ labels.subtotal }}</td><td class="num">{{ "%.2f" | format(invoice.subtotal) | digits }} {{ invoice.currency }}</td></tr>
+  <tr><td>{{ labels.vat }}</td><td class="num">{{ "%.2f" | format(invoice.vat_amount) | digits }} {{ invoice.currency }}</td></tr>
+  <tr><td>{{ labels.total }}</td><td class="num">{{ "%.2f" | format(invoice.total) | digits }} {{ invoice.currency }}</td></tr>
 </table>
 </body>
 </html>
