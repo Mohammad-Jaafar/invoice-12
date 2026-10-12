@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 14px; color: #222; margin: 48px; }
+h1 { text-align: center; letter-spacing: 2px; margin-bottom: 32px; }
+.meta { display: flex; justify-content: space-between; margin-bottom: 24px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #999; padding: 8px; }
+th { background: #eee; text-align: left; }
+.num { text-align: right; }
+.totals { width: 40%; margin-left: auto; margin-top: 16px; }
+.totals td:first-child { font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>TAX INVOICE</h1>
+<div class="meta">
+  <div>
+    <strong>{{ invoice.supplier_name }}</strong><br>
+    TRN: {{ invoice.supplier_trn }}
+  </div>
+  <div>
+    Invoice No: {{ invoice.invoice_number }}<br>
+    Date: {{ invoice.invoice_date.strftime("%d/%m/%Y") }}
+  </div>
+</div>
+<table>
+  <tr>
+    <th>Description</th>
+    <th class="num">Qty</th>
+    <th class="num">Unit Price</th>
+    <th class="num">Amount</th>
+  </tr>
+  {% for item in invoice.items %}
+  <tr>
+    <td>{{ item.description }}</td>
+    <td class="num">{{ item.quantity | int }}</td>
+    <td class="num">{{ "%.2f" | format(item.unit_price) }}</td>
+    <td class="num">{{ "%.2f" | format(item.line_total) }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<table class="totals">
+  <tr><td>Subtotal</td><td class="num">{{ "%.2f" | format(invoice.subtotal) }} {{ invoice.currency }}</td></tr>
+  <tr><td>VAT 5%</td><td class="num">{{ "%.2f" | format(invoice.vat_amount) }} {{ invoice.currency }}</td></tr>
+  <tr><td>Total</td><td class="num">{{ "%.2f" | format(invoice.total) }} {{ invoice.currency }}</td></tr>
+</table>
+</body>
+</html>
