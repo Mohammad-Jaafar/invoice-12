@@ -85,3 +85,23 @@ I will remove the change.
 3. The model add arabic letters to words without needed "inv_002_mixed_classic"
    Hypothesis : the model is weak on reading arabic letters and numbers
    Next : try another model
+
+
+
+## Model comparison (scanned, 30 invoices)
+ 
+| metric | gemini-3.8-flash | gemini-3.8-flash-lite |
+|---------------|------------------|-----------------------|
+| fully correct | ..% | ..% |
+| weakest field | field ..% | field ..% |
+| validator caught | ../.. | ../.. |
+| false alarms | ../.. | ../.. |
+| avg seconds | .. | .. |
+| cost per invoice | $.. | $.. |
+| cost per fully-correct invoice | $.. | $.. |
+ 
+## Decision
+Default model: ...
+Why: ...
+When I would switch: ...
+Next idea: ...
