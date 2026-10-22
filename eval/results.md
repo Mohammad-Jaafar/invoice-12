@@ -76,32 +76,25 @@ It didn't exceed the noise.
 I will remove the change.
 
 ## Error analysis : 
-1. The most of errors 16 from first test and 22 from the second are mistake between 2 and 3 in indic digits "inv_001_ar_classic"
+1. The most common digit error is reading ٢ as ٣ "inv_001_ar_classic"
    Hypothesis : the invoices are small
    Next : test 2x size
-2. The model make mistake when read invoice number RTL read as LTR "inv_001_ar_classic"
+2. The model makes mistakes when reading invoice number reads the RTL invoice number as LTR     "inv_001_ar_classic"
    Hypothesis : the model read LTR in arabic or mixed invoices
    Next : add additional information to the prompts
-3. The model add arabic letters to words without needed "inv_002_mixed_classic"
+3. The model adds Arabic letters that are not printed "inv_002_mixed_classic"
    Hypothesis : the model is weak on reading arabic letters and numbers
    Next : try another model
 
 
 
 ## Model comparison (scanned, 30 invoices)
- 
-| metric | gemini-3.8-flash | gemini-3.8-flash-lite |
-|---------------|------------------|-----------------------|
-| fully correct | ..% | ..% |
-| weakest field | field ..% | field ..% |
-| validator caught | ../.. | ../.. |
-| false alarms | ../.. | ../.. |
-| avg seconds | .. | .. |
-| cost per invoice | $.. | $.. |
-| cost per fully-correct invoice | $.. | $.. |
+The "Gemini flash 3.8" stopped after 20 invoice because of reaching the usage limits
+and because of that I decide to make "Gemini flash lite 3.8" the Default model
+
  
 ## Decision
-Default model: ...
-Why: ...
-When I would switch: ...
+Default model: Gemini flash lite 3.8
+Why: Free + Good accuracy
+When I would switch: When I activate the payment
 Next idea: ...
