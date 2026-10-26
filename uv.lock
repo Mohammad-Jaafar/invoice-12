@@ -725,7 +725,7 @@ wheels = [
 [[package]]
 name = "invoice-extractor"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "google-genai" },

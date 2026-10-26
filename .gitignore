@@ -3,3 +3,6 @@
 __pycache__
 data/
 eval/runs/
+LEARNING_LOG.md
+WEEK1_KPIS.md
+check_week1.py

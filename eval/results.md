@@ -89,12 +89,11 @@ I will remove the change.
 
 
 ## Model comparison (scanned, 30 invoices)
-The "Gemini flash 3.8" stopped after 20 invoice because of reaching the usage limits
-and because of that I decide to make "Gemini flash lite 3.8" the Default model
+I tried gemini-3.8-flash, but 17 of 30 invoices failed (11 because of the free tier limit of 20 requests per day, 5 because the server was busy, 1 cut-off answer), so the comparison is not complete.
+Because of that I decided to keep gemini-flash-lite-latest as the default model.
 
- 
 ## Decision
-Default model: Gemini flash lite 3.8
-Why: Free + Good accuracy
-When I would switch: When I activate the payment
-Next idea: ...
+Default model: gemini-flash-lite-latest
+Why: it has 500 free requests per day (gemini-3.8-flash has 20), and it gets 70-73% fully correct in about 6 seconds per invoice.
+When I would switch: when I activate the payment and a stronger model improves fully correct by more than the noise (±1 invoice).
+Next idea: test 2x image size to see if the ٢/٣ error goes down.
