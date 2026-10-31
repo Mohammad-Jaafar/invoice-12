@@ -1,4 +1,4 @@
-FROM python:3.10.11-slim-trixie
+FROM python:3.14-slim-trixie
  
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
  
