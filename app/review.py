@@ -6,14 +6,14 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
-from sqlalchemy import case, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session, defer
 
 from app.db import get_session
 from app.models import Extraction
 from app.schema import Invoice
 from app.security import require_admin
-from eval.score import score_invoice
+from eval.score import FIELDS, score_invoice
 
 router = APIRouter(prefix="/review", dependencies=[Depends(require_admin)])
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
@@ -36,6 +36,41 @@ def review_list(request: Request, show: str = "pending", session: Session = Depe
     ).limit(200)
     rows = session.scalars(query).all()
     return templates.TemplateResponse(request, "list.html", {"rows": rows, "show": show})
+
+
+def count(session: Session, *conditions) -> int:
+    return session.scalar(select(func.count(Extraction.id)).where(*conditions))
+
+
+@router.get("/stats")
+def review_stats(request: Request, session: Session = Depends(get_session)):
+    total = session.scalar(select(func.count(Extraction.id)))
+    tags = session.execute(
+        select(Extraction.tag, func.count(Extraction.id))
+        .group_by(Extraction.tag)
+        .order_by(Extraction.tag)
+    ).all()
+    changed = {field: 0 for field in FIELDS}
+    pairs = session.execute(
+        select(Extraction.data, Extraction.reviewed_data).where(
+            Extraction.reviewed_data.is_not(None)
+        )
+    ).all()
+    for original, reviewed in pairs:
+        scores = score_invoice(Invoice.model_validate(reviewed), Invoice.model_validate(original))
+        for field in FIELDS:
+            if not scores[field]:
+                changed[field] += 1
+    context = {
+        "total": total,
+        "needs_review": count(session, Extraction.status == "needs_review"),
+        "reviewed": len(pairs),
+        "corrected": count(session, Extraction.review_status == "corrected"),
+        "pending": count(session, Extraction.review_status == "pending"),
+        "tags": tags,
+        "changed": changed,
+    }
+    return templates.TemplateResponse(request, "stats.html", context)
 
 
 @router.get("/{id}/image")
