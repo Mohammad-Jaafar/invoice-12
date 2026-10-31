@@ -22,5 +22,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "opencv-python-headless>=5.0.0.93",
+    "playwright>=1.63.0",
     "pytest>=9.1.1",
 ]

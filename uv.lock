@@ -741,6 +741,8 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "opencv-python-headless" },
+    { name = "playwright" },
     { name = "pytest" },
 ]
 
@@ -759,7 +761,11 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=9.1.1" }]
+dev = [
+    { name = "opencv-python-headless", specifier = ">=5.0.0.93" },
+    { name = "playwright", specifier = ">=1.63.0" },
+    { name = "pytest", specifier = ">=9.1.1" },
+]
 
 [[package]]
 name = "jinja2"
