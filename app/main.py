@@ -12,6 +12,8 @@ from app import db
 from app.db import get_session
 from app.extractor import MEDIA_TYPES, MODEL, extract_bytes
 from app.models import Extraction
+from app.review import router as review_router
+from app.security import require_admin
 from app.validator import validate
 
 TAGS = {"demo", "real", "synthetic"}
@@ -24,6 +26,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Invoice Extractor", lifespan=lifespan)
+app.include_router(review_router)
 
 
 def summary(row: Extraction) -> dict:
@@ -84,7 +87,7 @@ def extract(file: UploadFile, tag: str = "demo", session: Session = Depends(get_
     return {**summary(row), "duplicate": False, "invoice": row.data, "usage": usage}
 
 
-@app.get("/extractions")
+@app.get("/extractions", dependencies=[Depends(require_admin)])
 def list_extractions(
     limit: int = Query(20, ge=1, le=200), session: Session = Depends(get_session)
 ) -> list[dict]:
@@ -94,7 +97,7 @@ def list_extractions(
     return [summary(row) for row in rows]
 
 
-@app.get("/extractions/{id}")
+@app.get("/extractions/{id}", dependencies=[Depends(require_admin)])
 def get_extraction(id: int, session: Session = Depends(get_session)) -> dict:
     row = session.get(Extraction, id)
     if row is None:

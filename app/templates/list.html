@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ "Pending review" if show == "pending" else "All extractions" }}</h1>
+{% if rows %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>File</th>
+      <th>Tag</th>
+      <th>Validator status</th>
+      <th>Problems</th>
+      <th>Review status</th>
+      <th class="num">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td><a href="/review/{{ row.id }}">{{ row.id }}</a></td>
+      <td>{{ row.filename }}</td>
+      <td>{{ row.tag }}</td>
+      <td><span class="badge {{ 'bad' if row.status == 'needs_review' else 'good' }}">{{ row.status }}</span></td>
+      <td>{{ row.problems | length }}</td>
+      <td>{{ row.review_status }}</td>
+      <td class="num">{{ row.data.total }} {{ row.data.currency }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nothing here.</p>
+{% endif %}
+{% endblock %}
