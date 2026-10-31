@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .grid img { max-width: 100%; border: 1px solid #d0d7de; border-radius: 6px; background: #fff; }
+  .panel { background: #fff; border: 1px solid #d0d7de; border-radius: 6px; padding: 16px; }
+  .problems { color: #cf222e; margin: 0 0 16px; padding-left: 20px; }
+  .error { background: #ffebe9; color: #cf222e; border: 1px solid #cf222e; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; }
+  .panel table { margin-bottom: 16px; }
+  textarea { width: 100%; min-height: 320px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; padding: 10px; border: 1px solid #d0d7de; border-radius: 6px; }
+  button { padding: 8px 14px; border: 1px solid #d0d7de; border-radius: 6px; background: #f6f8fa; cursor: pointer; font-size: 14px; }
+  button[value="approve"] { background: #1a7f37; border-color: #1a7f37; color: #fff; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+</style>
+<h1>
+  #{{ row.id }} · {{ row.filename }}
+  <span class="badge {{ 'bad' if row.status == 'needs_review' else 'good' }}">{{ row.status }}</span>
+  <span class="badge">{{ row.review_status }}</span>
+</h1>
+{% if row.problems %}
+<ul class="problems">
+  {% for problem in row.problems %}
+  <li>{{ problem }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+<div class="grid">
+  <div>
+    <img src="/review/{{ row.id }}/image" alt="{{ row.filename }}">
+  </div>
+  <div class="panel">
+    <table>
+      <tr><th>Supplier</th><td>{{ invoice.supplier_name }}</td></tr>
+      <tr><th>TRN</th><td>{{ invoice.supplier_trn }}</td></tr>
+      <tr><th>Number</th><td>{{ invoice.invoice_number }}</td></tr>
+      <tr><th>Date</th><td>{{ invoice.invoice_date }}</td></tr>
+      <tr><th>Subtotal</th><td>{{ invoice.subtotal }} {{ invoice.currency }}</td></tr>
+      <tr><th>VAT</th><td>{{ invoice.vat_amount }} {{ invoice.currency }}</td></tr>
+      <tr><th>Total</th><td>{{ invoice.total }} {{ invoice.currency }}</td></tr>
+    </table>
+    <form method="post" action="/review/{{ row.id }}">
+      <textarea name="invoice_json" dir="auto">{{ invoice_json }}</textarea>
+      <p>
+        <button type="submit" name="action" value="approve">Approve as extracted</button>
+        <button type="submit" name="action" value="save">Save corrections</button>
+      </p>
+    </form>
+  </div>
+</div>
+{% endblock %}
