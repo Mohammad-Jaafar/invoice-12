@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Stats</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th class="num">Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Total extractions</td><td class="num">{{ total }}</td></tr>
+    <tr><td>Needs review (validator)</td><td class="num">{{ needs_review }}</td></tr>
+    <tr><td>Reviewed</td><td class="num">{{ reviewed }}</td></tr>
+    <tr><td>Corrected</td><td class="num">{{ corrected }}</td></tr>
+    <tr><td>Pending</td><td class="num">{{ pending }}</td></tr>
+    {% for tag, n in tags %}
+    <tr><td>Tag: {{ tag }}</td><td class="num">{{ n }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h1 style="margin-top: 28px;">Fields changed by the reviewer</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th class="num">Changed in reviewed invoices ({{ reviewed }})</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for field, n in changed.items() %}
+    <tr><td>{{ field }}</td><td class="num">{{ n }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
