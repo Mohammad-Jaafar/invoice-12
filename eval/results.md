@@ -97,3 +97,8 @@ Default model: gemini-flash-lite-latest
 Why: it has 500 free requests per day (gemini-3.8-flash has 20), and it gets 70-73% fully correct in about 6 seconds per invoice.
 When I would switch: when I activate the payment and a stronger model improves fully correct by more than the noise (±1 invoice).
 Next idea: test 2x image size to see if the ٢/٣ error goes down.
+
+## Review
+Reviewed 10 scanned synthetic invoices in the dashboard.
+Average review time: 80 seconds per invoice (min 20, max 120).
+Flagged by the validator: 2. Corrected by me: 2. Corrected but NOT flagged: 0.
