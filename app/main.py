@@ -1,11 +1,13 @@
 import hashlib
+import os
 import time
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app import db
@@ -13,7 +15,7 @@ from app.db import get_session
 from app.extractor import MEDIA_TYPES, MODEL, extract_bytes
 from app.models import Extraction
 from app.review import router as review_router
-from app.security import require_admin
+from app.security import require_admin, require_api_token
 from app.validator import validate
 
 TAGS = {"demo", "real", "synthetic"}
@@ -51,7 +53,7 @@ def health(session: Session = Depends(get_session)):
     return {"status": "ok", "database": "ok"}
 
 
-@app.post("/extract")
+@app.post("/extract", dependencies=[Depends(require_api_token)])
 def extract(file: UploadFile, tag: str = "demo", session: Session = Depends(get_session)) -> dict:
     if tag not in TAGS:
         raise HTTPException(status_code=400, detail="tag must be demo, real or synthetic")
@@ -59,10 +61,16 @@ def extract(file: UploadFile, tag: str = "demo", session: Session = Depends(get_
     if suffix not in MEDIA_TYPES:
         raise HTTPException(status_code=400, detail="Upload a PNG, JPG or WebP image")
     data = file.file.read()
+    if len(data) > int(os.environ.get("MAX_UPLOAD_MB", "5")) * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large")
     sha256 = hashlib.sha256(data).hexdigest()
     existing = session.scalar(select(Extraction).where(Extraction.sha256 == sha256))
     if existing:
         return {**summary(existing), "duplicate": True, "invoice": existing.data}
+    today = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+    used = session.scalar(select(func.count(Extraction.id)).where(Extraction.created_at >= today))
+    if used >= int(os.environ.get("MAX_EXTRACTIONS_PER_DAY", "50")):
+        raise HTTPException(status_code=429, detail="Daily extraction limit reached")
     media_type = MEDIA_TYPES[suffix]
     start = time.perf_counter()
     invoice, usage = extract_bytes(data, media_type)
