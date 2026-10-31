@@ -11,6 +11,8 @@ from app.schema import Invoice
 
 CLEAN = Path(__file__).resolve().parent.parent / "data" / "clean"
 AUTH = ("admin", "secret")
+TOKEN = "token123"
+API_HEADERS = {"X-API-Key": TOKEN}
 FIRST = "inv_000_en_classic.png"
 SECOND = "inv_001_ar_classic.png"
 
@@ -40,12 +42,16 @@ def fake(monkeypatch):
 def admin(monkeypatch):
     monkeypatch.setenv("ADMIN_USER", AUTH[0])
     monkeypatch.setenv("ADMIN_PASSWORD", AUTH[1])
+    monkeypatch.setenv("API_TOKEN", TOKEN)
 
 
-def upload(client: TestClient, name: str, tag: str = "demo"):
+def upload(client: TestClient, name: str, tag: str = "demo", headers: dict | None = None):
     path = CLEAN / name
     return client.post(
-        "/extract", params={"tag": tag}, files={"file": (path.name, path.read_bytes(), "image/png")}
+        "/extract",
+        params={"tag": tag},
+        files={"file": (path.name, path.read_bytes(), "image/png")},
+        headers=API_HEADERS if headers is None else headers,
     )
 
 
@@ -84,7 +90,11 @@ def test_same_image_is_a_duplicate(fake):
 
 def test_bad_file_and_bad_tag_return_400():
     with TestClient(app) as client:
-        text_file = client.post("/extract", files={"file": ("note.txt", b"hello", "text/plain")})
+        text_file = client.post(
+            "/extract",
+            files={"file": ("note.txt", b"hello", "text/plain")},
+            headers=API_HEADERS,
+        )
         bad_tag = upload(client, FIRST, tag="other")
     assert text_file.status_code == 400
     assert bad_tag.status_code == 400
@@ -190,3 +200,36 @@ def test_stats_page_loads():
         upload_two(client)
         response = client.get("/review/stats", auth=AUTH)
     assert response.status_code == 200
+
+
+def test_extract_without_api_key_returns_401():
+    with TestClient(app) as client:
+        response = upload(client, FIRST, headers={})
+    assert response.status_code == 401
+
+
+def test_extract_with_wrong_api_key_returns_401():
+    with TestClient(app) as client:
+        response = upload(client, FIRST, headers={"X-API-Key": "wrong"})
+    assert response.status_code == 401
+
+
+def test_large_upload_returns_413(monkeypatch):
+    monkeypatch.setenv("MAX_UPLOAD_MB", "1")
+    big = b"x" * (2 * 1024 * 1024)
+    with TestClient(app) as client:
+        response = client.post(
+            "/extract", files={"file": ("big.png", big, "image/png")}, headers=API_HEADERS
+        )
+    assert response.status_code == 413
+
+
+def test_daily_limit_blocks_new_images_but_not_duplicates(monkeypatch):
+    monkeypatch.setenv("MAX_EXTRACTIONS_PER_DAY", "3")
+    names = [path.name for path in sorted(CLEAN.glob("*.png"))[:4]]
+    with TestClient(app) as client:
+        codes = [upload(client, name).status_code for name in names]
+        again = upload(client, names[0])
+    assert codes == [200, 200, 200, 429]
+    assert again.status_code == 200
+    assert again.json()["duplicate"] is True
