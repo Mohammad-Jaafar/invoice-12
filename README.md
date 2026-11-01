@@ -76,3 +76,6 @@ After copying `.env.example` to `.env`, put your key in `GEMINI_API_KEY`. On Win
 4. The validator does not detect reading errors that do not break the math (for example a wrong invoice number).
 5. Small sample: 30 invoices, with a noise of ±1 invoice.
 6. Only one model was fully evaluated, because of the free tier limits.
+
+Live demo : 
+https://invoice-extractor-84jp.onrender.com/
