@@ -2,6 +2,11 @@
 
 Arabic/English invoice image -> validated JSON, with an arithmetic validator and an evaluation harness.
 
+
+**Live demo:** https://invoice-extractor-84jp.onrender.com/docs  (free instance: the first request after
+idle can take about a minute; uploads need an API key, available on request)
+
+
 ## Problem
 From 1 January 2027, companies in the UAE with AED 50 million or more in revenue must issue e-invoices, and smaller companies must follow from 1 July 2027.
 Many companies still have large archives of paper and scanned invoices, many of them in Arabic or in both Arabic and English, and turning them into structured data by hand is slow and error-prone, especially for Arabic.
@@ -42,11 +47,13 @@ I tried a second model, `gemini-3.8-flash`, but the Gemini free tier allows only
 ## How it works
 ```mermaid
 flowchart LR
-  A[Invoice image] --> B[Gemini vision + structured output]
-  B --> C[Invoice JSON]
-  C --> D{Validator}
-  D -->|ok| E[Accept]
-  D -->|needs_review| F[Human review]
+  A[Invoice image] --> B[FastAPI /extract]
+  B -->|sha256 seen before| D[(PostgreSQL)]
+  B --> C[Gemini vision + schema]
+  C --> V[Arithmetic validator]
+  V --> D
+  D --> R[Review dashboard]
+  R -->|corrections| D
 ```
 
 1. An invoice image (PNG, JPG or WebP) is sent to the extractor.
@@ -76,6 +83,3 @@ After copying `.env.example` to `.env`, put your key in `GEMINI_API_KEY`. On Win
 4. The validator does not detect reading errors that do not break the math (for example a wrong invoice number).
 5. Small sample: 30 invoices, with a noise of ±1 invoice.
 6. Only one model was fully evaluated, because of the free tier limits.
-
-Live demo : 
-https://invoice-extractor-84jp.onrender.com/
