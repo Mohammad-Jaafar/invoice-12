@@ -102,3 +102,12 @@ Next idea: test 2x image size to see if the ٢/٣ error goes down.
 Reviewed 10 scanned synthetic invoices in the dashboard.
 Average review time: 80 seconds per invoice (min 20, max 120).
 Flagged by the validator: 2. Corrected by me: 2. Corrected but NOT flagged: 0.
+
+
+## Real invoices
+Note: no real invoices were collected this week. This section is a dry run of the real-invoice pipeline
+(upload with tag=real, review, real_eval) on 10 NEW synthetic invoices (seed 2026, never seen before)
+degraded to look like phone photos. The numbers below are not real-world accuracy.
+
+Prediction (written before measuring): fully correct about 65%; weakest field: total (Arabic-Indic digits);
+the validator will give false alarms on 0 invoices because these are UAE-style invoices with 5% VAT and 15-digit TRNs.
