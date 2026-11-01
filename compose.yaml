@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: app
       POSTGRES_DB: invoices
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -14,6 +14,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+ 
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://app:app@db:5432/invoices
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
  
 volumes:
   pgdata:
