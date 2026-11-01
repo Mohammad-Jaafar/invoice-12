@@ -111,3 +111,29 @@ degraded to look like phone photos. The numbers below are not real-world accurac
 
 Prediction (written before measuring): fully correct about 65%; weakest field: total (Arabic-Indic digits);
 the validator will give false alarms on 0 invoices because these are UAE-style invoices with 5% VAT and 15-digit TRNs.
+
+Result: 10 simulated invoices (4 English, 3 Arabic, 3 mixed; all phone-photo style), reviewed against their ground truth.
+Fully correct: 6 of 10 (60%). Synthetic scanned for comparison: 73% (22 of 30).
+By language: English 4 of 4, Arabic 1 of 3, mixed 1 of 3.
+Weakest fields: supplier_trn (60%, 6 of 10), items (60%, 6 of 10), invoice_date (80%, 8 of 10).
+Validator: caught 4 of 4 wrong invoices; false alarms on 0 of 6 correct ones.
+Average review time: not measured (the dry-run review compared each invoice with its ground truth automatically).
+Average extraction: 5.4 s, 1197 tokens in / 328 out.
+
+| error type | invoices | example |
+|---|---|---|
+| reading (Arabic-Indic ٢ read as ٣) | 4 | real_008: supplier_trn 100271436743500 read as 100371436743500 |
+| reading (date digits) | 2 | real_005: invoice_date 2026-12-12 read as 2026-03-13 |
+| invented value | 0 | none |
+| schema mismatch | 0 | none (all invoices follow the UAE schema) |
+
+Every wrong invoice is Arabic or mixed, and every error is the same ٢ -> ٣ misreading seen in week 1.
+The validator caught all four because a misread digit breaks a line total, the subtotal or the TRN length.
+
+What surprised me compared with my prediction: the weakest field was supplier_trn, not total; total was 90%.
+What I would fix first and why: the ٢/٣ confusion (upscale the image 2x before sending it, or a second pass on Arabic digits),
+because it is the only error type on this set and it hits every Arabic and mixed failure.
+
+Comparison with synthetic: 60% here against 73% on the week-1 scanned set. With 10 invoices one invoice is 10 points,
+so the gap is about one invoice and within the noise measured in week 1. Real receipts (different layouts, VAT
+included in prices, no TRN) are still untested and will likely score lower.

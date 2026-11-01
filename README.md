@@ -44,6 +44,14 @@ The most common error is reading the Arabic-Indic digit ٢ (2) as ٣ (3): 16 to 
 ### Model comparison
 I tried a second model, `gemini-3.8-flash`, but the Gemini free tier allows only 20 requests per day for this model, so 17 of 30 invoices failed. The comparison is not complete yet.
 
+### Results on real invoices
+Not measured yet: no real invoices were collected. As a dry run of the real-invoice pipeline (upload with
+`tag=real`, review in the dashboard, `eval/real_eval.py`), I used 10 new synthetic invoices degraded to look
+like phone photos. Fully correct: 6 of 10 (English 4/4, Arabic 1/3, mixed 1/3). Every failure was the same
+٢ -> ٣ misreading, and the validator caught all 4 wrong invoices with no false alarms.
+The validator assumes UAE rules (5% VAT, 15-digit TRN), so real non-UAE receipts will likely trigger false alarms.
+The sample is small and synthetic; treat these numbers as a check of the pipeline, not a benchmark.
+
 ## How it works
 ```mermaid
 flowchart LR
